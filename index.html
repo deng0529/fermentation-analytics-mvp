@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'>
+<title>Fermentation Analytics MVP</title>
+<style>html{color-scheme:light dark}body{max-width:1120px;margin:20px auto;padding:0 12px;font-family:system-ui}</style>
+</head>
+<body>
+<div id="fermentation-mvp">
+  <header><div class="identity"><span aria-hidden="true">◈</span><strong>Fermentation Analytics</strong></div><span class="tag">Illustrative prototype</span></header>
+  <nav aria-label="Workspace">
+    <button type="button" data-view="monitor" aria-pressed="true">Batch Monitor</button>
+    <button type="button" data-view="calibration" aria-pressed="false">Spectral Calibration</button>
+    <button type="button" data-view="validation" aria-pressed="false">Data &amp; Validation</button>
+  </nav>
+  <main></main>
+</div>
+<style>
+#fermentation-mvp {
+  color-scheme:light dark;
+  --paper:light-dark(#f0f5f3,#101e1c); --panel:light-dark(#fff,#182a26);
+  --ink:light-dark(#182e28,#e6f3ef); --muted:light-dark(#536961,#a8bfb7);
+  --border:light-dark(#ccded7,#39564e); --accent:light-dark(#08785f,#73e2bd);
+  --tint:light-dark(#d9f1e8,#24473d); --blue:light-dark(#375ab5,#a6baff);
+  --warn:light-dark(#924518,#ffc08c); --warn-bg:light-dark(#fff0e3,#492c20);
+  font:14px/1.45 system-ui,sans-serif; color:var(--ink); background:var(--paper);
+  border:1px solid var(--border); border-radius:16px; overflow:hidden;
+}
+#fermentation-mvp * {box-sizing:border-box}
+#fermentation-mvp [hidden] {display:none!important}
+#fermentation-mvp header,#fermentation-mvp nav {padding:12px clamp(12px,3vw,26px);background:var(--panel);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+#fermentation-mvp header {justify-content:space-between}
+#fermentation-mvp .identity {display:flex;align-items:center;gap:9px}
+#fermentation-mvp .identity span {display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--tint);color:var(--accent);font-size:22px}
+#fermentation-mvp .tag {background:var(--tint);color:var(--accent);border-radius:99px;padding:4px 9px;font-weight:600}
+#fermentation-mvp main {padding:clamp(12px,3vw,26px);display:grid;gap:14px}
+#fermentation-mvp h1,#fermentation-mvp h2,#fermentation-mvp h3,#fermentation-mvp p {margin:0}
+#fermentation-mvp h1 {font-size:clamp(25px,4vw,35px);letter-spacing:-.04em}
+#fermentation-mvp h2 {font-size:17px}
+#fermentation-mvp h3 {font-size:15px}
+#fermentation-mvp .muted,#fermentation-mvp small {color:var(--muted)}
+#fermentation-mvp .row {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+#fermentation-mvp .actions {display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#fermentation-mvp .box,#fermentation-mvp .stat {background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:14px;min-width:0}
+#fermentation-mvp .box {display:grid;gap:10px}
+#fermentation-mvp .stats {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
+#fermentation-mvp .stat strong {display:block;font-size:22px;font-variant-numeric:tabular-nums}
+#fermentation-mvp .pair {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#fermentation-mvp .warning {background:var(--warn-bg);color:var(--warn);border-radius:9px;padding:9px 12px}
+#fermentation-mvp button,#fermentation-mvp select,#fermentation-mvp input:not([type=checkbox]):not([type=range]) {font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:6px 9px;max-width:100%}
+#fermentation-mvp button {cursor:pointer}
+#fermentation-mvp button:disabled {opacity:.5;cursor:default}
+#fermentation-mvp nav button {border-color:transparent}
+#fermentation-mvp button[aria-pressed=true],#fermentation-mvp .primary {background:var(--tint);color:var(--accent);border-color:var(--accent);font-weight:650}
+#fermentation-mvp label.field {display:grid;gap:3px;min-width:0}
+#fermentation-mvp input {accent-color:var(--accent)}
+#fermentation-mvp input[type=range] {width:100%;margin:0}
+#fermentation-mvp fieldset {min-width:0;margin:0;border:1px solid var(--border);border-radius:8px;padding:8px 10px;display:grid;gap:8px}
+#fermentation-mvp legend {font-weight:650}
+#fermentation-mvp .channels {display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:5px 8px}
+#fermentation-mvp .channels label {display:flex;align-items:center;gap:4px}
+#fermentation-mvp .table-wrap {overflow:auto}
+#fermentation-mvp table {width:100%;border-collapse:collapse;text-align:left;font-variant-numeric:tabular-nums}
+#fermentation-mvp td,#fermentation-mvp th {padding:7px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+#fermentation-mvp .plot {width:100%;height:180px;display:block}
+#fermentation-mvp .plot text {fill:var(--muted);font-size:11px}
+#fermentation-mvp .key {display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:12px}
+#fermentation-mvp .swatch {display:inline-block;width:12px;height:3px;vertical-align:middle;margin-right:4px;background:var(--accent)}
+#fermentation-mvp .swatch.alt {background:var(--blue)}
+#fermentation-mvp .swatch.ref {width:7px;height:7px;border-radius:50%;background:var(--ink)}
+#fermentation-mvp a {color:var(--accent)}
+#fermentation-mvp .run-summary {overflow-wrap:anywhere}
+@media(max-width:560px) {#fermentation-mvp .pair {grid-template-columns:1fr}}
+@media(pointer:coarse) {#fermentation-mvp button,#fermentation-mvp select,#fermentation-mvp .channels label {min-height:44px}}
+</style>
+<script>
+(() => {
+  const root = document.getElementById('fermentation-mvp');
+  const main = root.querySelector('main');
+  const end = 60;
+  const target = 48;
+  const labReference = 44.9;
+  const forecastValues = [47.2,46.4,45.7,45.1,44.8,44.6];
+  const sources = {
+    nir: {
+      name:'chemometrics::NIR', compounds:['Ethanol','Glucose'], unit:'nm',
+      channels:[1115,1220,1330,1430,1540,1650,1760,1870,1980,2090,2200,2285],
+      type:'First-derivative NIR absorbance and reference concentrations',
+      purpose:'Ethanol and glucose calibration',
+      url:'https://search.r-project.org/CRAN/refmans/chemometrics/html/NIR.html',
+      references:{Ethanol:[12,19,27,33,41,48],Glucose:[3,6,10,16,23,31]}
+    },
+    mir: {
+      name:'chemotools', compounds:['Glucose'], unit:'cm⁻¹',
+      channels:[900,950,1000,1050,1100,1150,1200,1250,1300,1350,1400,1450],
+      type:'ATR mid-infrared spectra and HPLC glucose references',
+      purpose:'Glucose calibration and time-ordered replay',
+      url:'https://chemotools.org/learn/datasets.html',
+      references:{Glucose:[8,13,19,26,33,39]},
+      replay:{hours:[0,4,8,12,16,20,24],pls:[41,36,31,24,17,10,5],svr:[40,37,30,23,16,11,6],hplc:[40,null,30,null,17,null,5]}
+    }
+  };
+  const defaults = {components:3,kernel:'rbf',c:10,epsilon:.1,gamma:.05};
+  const offsets = {pls:[.8,-1.1,.6,1.4,-1.8,.9],svr:[-.5,.7,-.9,.3,1.1,-.6]};
+  const batch = Array.from({length:end+1}, (_,hour) => ({
+    hour, ethanol: +(45.1*(1-Math.pow(1-hour/end,1.75))).toFixed(1),
+    glucose: +(3.8+67*Math.pow(1-hour/end,1.8)).toFixed(1),
+    temperature: +(30+.32*Math.sin(hour/5)).toFixed(1),
+    ph: +(5.4-1.15*hour/end).toFixed(2),
+    forecast: forecastValues[hour-54] ?? null
+  }));
+  const state = {view:'monitor',hour:54,source:'nir',compound:'Ethanol',selected:new Set(),settings:{...defaults},runs:[],calHour:0};
+  const source = () => sources[state.source];
+  const byId = id => main.querySelector('#fm-'+id);
+  const unit = value => value == null ? '—' : value.toFixed(1)+' g/L';
+  const signed = value => (value>0?'+':'')+value.toFixed(1)+' g/L';
+  const stat = (label,value,detail='') => `<div class="stat"><small>${label}</small><strong>${value}</strong>${detail?'<small>'+detail+'</small>':''}</div>`;
+  const table = (headers,rows) => `<div class="table-wrap"><table><thead><tr>${headers.map(x=>'<th scope="col">'+x+'</th>').join('')}</tr></thead><tbody>${rows.map(row=>'<tr>'+row.map(x=>'<td>'+x+'</td>').join('')+'</tr>').join('')}</tbody></table></div>`;
+  const key = (text,kind='') => `<span><i aria-hidden="true" class="swatch ${kind}"></i>${text}</span>`;
+
+  function drawPlot(svg, series, options) {
+    const {xMax, yMax, yMin=0, xLabel='Elapsed hours', xStart=0, xTicks=4, pointer} = options;
+    const width = Math.max(200,svg.clientWidth);
+    const left=35, right=width-14, top=15, bottom=139;
+    const x = v => left+v*(right-left)/xMax;
+    const y = v => bottom-(v-yMin)*(bottom-top)/(yMax-yMin);
+    const colors = ['var(--accent)','var(--blue)','var(--ink)'];
+    svg.setAttribute('viewBox',`0 0 ${width} 180`);
+    svg.innerHTML = [0,1,2,3].map(i => {
+      const value = yMin+(yMax-yMin)*i/3;
+      return `<line x1="${left}" x2="${right}" y1="${y(value)}" y2="${y(value)}" stroke="var(--border)"/><text x="1" y="${y(value)+4}">${+value.toFixed(1)}</text>`;
+    }).join('')+Array.from({length:xTicks+1},(_,i) => {
+      const value=xMax*i/xTicks;
+      return `<text x="${x(value)}" y="155" text-anchor="middle">${+(value+xStart).toFixed(1)}</text>`;
+    }).join('')+`<text x="${(left+right)/2}" y="174" text-anchor="middle">${xLabel}</text>`+
+    (pointer==null?'':`<line x1="${x(pointer)}" x2="${x(pointer)}" y1="${top}" y2="${bottom}" stroke="var(--muted)" stroke-dasharray="3 4"/>`)+
+    series.map(({points,dots=false,dash=false},i) => {
+      const coords=points.filter(([,v])=>v!=null);
+      const color=colors[i];
+      const line=dots?'':`<polyline points="${coords.map(([a,b])=>x(a)+','+y(b)).join(' ')}" stroke="${color}" fill="none" stroke-width="2.5" ${dash?'stroke-dasharray="5 3"':''}/>`;
+      return line+(dots||coords.length===1?coords.map(([a,b])=>`<circle cx="${x(a)}" cy="${y(b)}" r="3.7" fill="${color}"/>`).join(''):'');
+    }).join('');
+  }
+
+  function monitor() {
+    main.innerHTML = `<div class="row"><div><h1>Batch Monitor</h1><p class="muted">Batch F-0607 · Discharge scheduled at hour 60</p></div></div>
+      <section class="box"><div class="row"><h2>Hourly replay</h2><div class="actions"><button id="fm-restart" type="button">Restart</button><button id="fm-back" type="button">Previous hour</button><button class="primary" id="fm-next" type="button">Next hour</button></div></div>
+      <label for="fm-hour" id="fm-clock"></label><input id="fm-hour" type="range" min="0" max="60" step="1"></section>
+      <div class="stats" id="fm-stats" aria-live="polite"></div><div id="fm-alert" aria-live="polite"></div>
+      <div class="pair">
+        <section class="box"><h2>Concentration estimates (g/L)</h2><div class="key">${key('Ethanol')}${key('Glucose (dashed)','alt')}</div><svg class="plot" id="fm-trend" role="img" aria-label="Hourly concentration estimates in grams per litre"></svg></section>
+        <section class="box"><h2>Forecasts for hour 60</h2><div class="key">${key('Discharge forecast')}${key('Target (dashed)','alt')}</div><svg class="plot" id="fm-forecast" role="img" aria-label="Forecast ethanol at hour 60 by issue hour"></svg><p class="muted" id="fm-forecast-note"></p></section>
+      </div>
+      <section class="box"><h2>Recent readings</h2><div id="fm-recent"></div></section>`;
+    const changeHour = hour => { state.hour=hour; updateMonitor(); };
+    byId('hour').oninput = event => changeHour(+event.target.value);
+    byId('restart').onclick = () => changeHour(0);
+    byId('back').onclick = () => changeHour(state.hour-1);
+    byId('next').onclick = () => changeHour(state.hour+1);
+    updateMonitor();
+  }
+
+  function monitorPlots() {
+    const readings = batch.slice(0,state.hour+1);
+    drawPlot(byId('trend'),[{points:readings.map(r=>[r.hour,r.ethanol])},{points:readings.map(r=>[r.hour,r.glucose]),dash:true}],{xMax:end,yMax:75,pointer:state.hour});
+    drawPlot(byId('forecast'),[
+      {points:readings.filter(r=>r.forecast!=null).map(r=>[r.hour-54,r.forecast])},
+      {points:[[0,target],[6,target]],dash:true}
+    ],{xMax:6,yMin:42,yMax:51,xStart:54,xTicks:6,xLabel:'Forecast issue hour'});
+  }
+
+  function updateMonitor() {
+    const {hour} = state;
+    const row = batch[hour];
+    const issued = hour===end?batch[end-1]:row;
+    const gap = issued.forecast==null?null:issued.forecast-target;
+    byId('clock').textContent = `Hour ${hour} of ${end} · ${end-hour} h remaining`;
+    byId('hour').value=hour;
+    byId('hour').setAttribute('aria-valuetext',`Hour ${hour} of ${end}`);
+    byId('back').disabled=hour===0;
+    byId('next').disabled=hour===end;
+    byId('stats').innerHTML = stat('Current ethanol estimate',unit(row.ethanol))+
+      stat('Current glucose estimate',unit(row.glucose))+
+      stat('Ethanol forecast at discharge',unit(issued.forecast),gap==null?'Starts at hour 54':`Target gap ${signed(gap)} · issued h${issued.hour}`)+
+      (hour===end?stat('Discharge lab reference',unit(labReference),`Target gap ${signed(labReference-target)}`):'');
+    byId('alert').innerHTML = hour===end
+      ? '<p class="warning"><strong>Discharged below target.</strong> Example lab reference is available.</p>'
+      : gap!=null&&gap<0
+        ? `<p class="warning"><strong>Potential shortfall.</strong> The forecast is ${unit(-gap)} below the ${unit(target)} target. Review the recent readings below.</p>`
+        : gap==null?'<p class="muted">Warning status · Awaiting first discharge forecast</p>':'<p class="muted">No shortfall warning.</p>';
+    byId('forecast-note').textContent = hour<54?'First forecast issued at hour 54.':'Each forecast predicts ethanol at the same scheduled endpoint.';
+    byId('recent').innerHTML = table(['Hour','Ethanol est.','Glucose est.','Temp.','pH'],
+      batch.slice(Math.max(0,hour-4),hour+1).reverse().map(r=>[r.hour,unit(r.ethanol),unit(r.glucose),r.temperature.toFixed(1)+' °C',r.ph.toFixed(2)]));
+    monitorPlots();
+  }
+
+  function resetFeatures() {
+    state.selected = new Set(source().channels.slice(2,9));
+  }
+  resetFeatures();
+
+  function calibration() {
+    const data = source();
+    main.innerHTML = `<div><h1>Spectral Calibration</h1><p class="muted">Configure two example calibrations on the same reference samples.</p></div>
+      <section class="box"><div class="pair">
+        <label class="field">Source<select id="fm-source">${Object.entries(sources).map(([id,s])=>`<option value="${id}">${s.name}</option>`).join('')}</select></label>
+        <label class="field">Compound<select id="fm-compound">${data.compounds.map(c=>`<option>${c}</option>`).join('')}</select></label>
+      </div><p class="muted">Reference target · ${state.compound} (g/L). Metadata · sample ID${state.source==='mir'?', elapsed time':''}.</p></section>
+      <section class="box"><div class="row"><h2>Example spectral channels</h2><strong id="fm-count" aria-live="polite"></strong></div>
+        <div class="actions"><label>From <select id="fm-from">${data.channels.map(c=>`<option>${c}</option>`).join('')}</select></label>
+          <label>To <select id="fm-to">${data.channels.map(c=>`<option>${c}</option>`).join('')}</select></label>
+          <span>${data.unit}</span><button type="button" id="fm-range">Select range</button></div>
+        <div class="channels">${data.channels.map(c=>`<label><input type="checkbox" data-channel="${c}"> ${c} ${data.unit}</label>`).join('')}</div>
+        <p class="muted run-summary" id="fm-selected"></p>
+      </section>
+      <form class="box" id="fm-form"><div class="row"><h2>Model settings</h2><button type="button" id="fm-reset">Reset settings</button></div>
+        <div class="pair"><fieldset><legend>PLS</legend><label class="field">Components<input id="fm-components" type="number" min="1" step="1" required></label><small id="fm-limit"></small></fieldset>
+        <fieldset><legend>SVR</legend><label class="field">Kernel<select id="fm-kernel"><option value="rbf">RBF</option><option value="linear">Linear</option></select></label>
+          <div class="pair"><label class="field">C<input id="fm-c" type="number" min="0.000001" step="any" required></label>
+          <label class="field">Epsilon<input id="fm-epsilon" type="number" min="0" step="any" required></label></div>
+          <label class="field" id="fm-gamma-label">Gamma<input id="fm-gamma" type="number" min="0.000001" step="any" required></label>
+        </fieldset></div>
+        <div class="actions"><button type="submit" class="primary" id="fm-train">Train PLS and SVR</button></div>
+      </form>
+      <div id="fm-result" aria-live="polite"></div>`;
+    byId('source').value=state.source;
+    byId('compound').value=state.compound;
+    byId('to').value=data.channels.at(-1);
+    byId('source').onchange = event => {
+      state.source=event.target.value;
+      if (!source().compounds.includes(state.compound)) state.compound=source().compounds[0];
+      resetFeatures();
+      calibration();
+      byId('source').focus();
+    };
+    byId('compound').onchange = event => {state.compound=event.target.value;calibration();byId('compound').focus();};
+    byId('range').onclick = () => {
+      const [min,max]=[+byId('from').value,+byId('to').value].sort((a,b)=>a-b);
+      state.selected=new Set(data.channels.filter(c=>c>=min&&c<=max));
+      updateFeatures();
+    };
+    main.querySelectorAll('[data-channel]').forEach(input => input.onchange = () => {
+      const value=+input.dataset.channel;
+      if (input.checked) state.selected.add(value); else state.selected.delete(value);
+      updateFeatures();
+    });
+    byId('reset').onclick = () => {state.settings={...defaults};fillSettings();};
+    for (const name of Object.keys(defaults)) {
+      byId(name).oninput = event => {
+        state.settings[name]=event.target.value;
+        if(name==='kernel') toggleGamma();
+      };
+    }
+    byId('form').onsubmit = event => {event.preventDefault();train();};
+    fillSettings();
+    updateFeatures();
+    renderRun();
+  }
+
+  function toggleGamma() {
+    const linear=state.settings.kernel==='linear';
+    byId('gamma-label').hidden=linear;
+    byId('gamma').disabled=linear;
+  }
+
+  function fillSettings() {
+    for (const [name,value] of Object.entries(state.settings)) byId(name).value=value;
+    toggleGamma();
+  }
+
+  function updateFeatures() {
+    const selected=source().channels.filter(c=>state.selected.has(c));
+    main.querySelectorAll('[data-channel]').forEach(input=>input.checked=state.selected.has(+input.dataset.channel));
+    byId('count').textContent=`${selected.length} of ${source().channels.length} selected`;
+    byId('selected').textContent=selected.length?`Selected · ${selected.join(', ')} ${source().unit}`:'Select at least one channel.';
+    byId('components').max=selected.length;
+    byId('limit').textContent=`Maximum for this example · ${selected.length} selected inputs`;
+    byId('train').disabled=selected.length===0;
+  }
+
+  function train() {
+    const {source:sourceId,compound,settings}=state;
+    const features=source().channels.filter(c=>state.selected.has(c));
+    const recorded = {components:+settings.components,kernel:settings.kernel,c:+settings.c,epsilon:+settings.epsilon,
+      gamma:settings.kernel==='linear'?null:+settings.gamma};
+    const rows=source().references[compound].map((reference,i)=>({
+      reference,pls:+(reference+offsets.pls[i]).toFixed(1),svr:+(reference+offsets.svr[i]).toFixed(1)
+    }));
+    state.runs.push({id:state.runs.length+1,sourceId,compound,features,settings:recorded,rows});
+    state.calHour=0;
+    renderRun();
+  }
+
+  function metrics(rows,model) {
+    const errors=rows.map(row=>row[model]-row.reference);
+    const mean=values=>values.reduce((a,b)=>a+b,0)/values.length;
+    return [mean(errors.map(Math.abs)),Math.sqrt(mean(errors.map(x=>x*x))),mean(errors)].map(x=>x.toFixed(2));
+  }
+
+  function renderRun() {
+    const run=state.runs.findLast(r=>r.sourceId===state.source&&r.compound===state.compound);
+    if (!run) {byId('result').innerHTML='';return;}
+    const s=run.settings;
+    byId('result').innerHTML = `<section class="box">
+      <h2>Illustrative comparison · Run ${run.id}</h2>
+      <p class="run-summary">${sources[run.sourceId].name} · ${run.compound} · ${run.features.length} channels (${run.features.join(', ')} ${sources[run.sourceId].unit})</p>
+      <p class="muted">PLS · ${s.components} components. SVR · ${s.kernel.toUpperCase()}, C ${s.c}, epsilon ${s.epsilon}${s.gamma==null?'':', gamma '+s.gamma}.</p>
+      <p class="muted">Example predictions are preset for this workflow. Metrics are calculated from the paired example values below. Bias is predicted minus reference.</p>
+      ${table(['Model','MAE (g/L)','RMSE (g/L)','Bias (g/L)','Samples'],['pls','svr'].map(m=>[m.toUpperCase(),...metrics(run.rows,m),run.rows.length]))}
+      <h3>Predicted versus reference</h3>
+      ${table(['Sample','Reference','PLS','SVR'],run.rows.map((r,i)=>[`S-${i+1}`,unit(r.reference),unit(r.pls),unit(r.svr)]))}
+      ${run.sourceId==='mir'? `<h3>Glucose replay</h3><div class="key">${key('PLS')}${key('SVR (dashed)','alt')}${key('HPLC reference','ref')}</div>
+        <svg class="plot" id="fm-glucose-plot" role="img" aria-label="Example glucose estimates and HPLC references in grams per litre by elapsed time"></svg>
+        <label for="fm-glucose-hour" id="fm-glucose-reading"></label><input type="range" id="fm-glucose-hour" min="0" max="6" step="1" value="${state.calHour}">`:''}
+      </section>`;
+    if (run.sourceId==='mir') {
+      byId('glucose-hour').oninput=event=>{state.calHour=+event.target.value;glucosePlot();};
+      glucosePlot();
+    }
+  }
+
+  function glucosePlot() {
+    const {hours,pls,svr,hplc}=sources.mir.replay;
+    const i=state.calHour;
+    const hour=hours[i];
+    drawPlot(byId('glucose-plot'),[
+      {points:hours.map((h,j)=>[h,pls[j]])},{points:hours.map((h,j)=>[h,svr[j]]),dash:true},
+      {points:hours.map((h,j)=>[h,hplc[j]]),dots:true}
+    ],{xMax:24,yMax:45,pointer:hour});
+    const reading=`Hour ${hour} · PLS ${unit(pls[i])} · SVR ${unit(svr[i])} · HPLC ${hplc[i]==null?'not sampled':unit(hplc[i])}`;
+    byId('glucose-reading').textContent=reading;
+    byId('glucose-hour').setAttribute('aria-valuetext',reading);
+  }
+
+  function validation() {
+    const items = [...Object.values(sources),{
+      name:'Synthetic batches · Model 2',purpose:'Discharge forecasts for on-target, shortfall and recovery cases',
+      compounds:['Ethanol (target)','Glucose (input)'],type:'Hourly simulated process readings and endpoint references'
+    }];
+    main.innerHTML = `<div><h1>Data &amp; Validation</h1><p class="muted">Source inventory and validation status</p></div>
+      ${items.map(item=>`<section class="box"><h2>${item.url?`<a href="${item.url}" target="_blank" rel="noopener noreferrer">${item.name}</a>`:item.name}</h2>
+        <p>${item.purpose}</p><p class="muted">${item.type} · ${item.compounds.join(', ')}</p>
+        ${table(['Dataset version','Import status','Record count','Validation results'],[['Pending','Not imported','Pending','Pending']])}</section>`).join('')}
+      <section class="box"><h2>Illustrative run history</h2>${state.runs.length?table(['Run','Source','Compound','Exact channels','PLS components','SVR settings'],state.runs.map(r=>[
+        r.id,sources[r.sourceId].name,r.compound,r.features.join(', ')+' '+sources[r.sourceId].unit,r.settings.components,
+        `${r.settings.kernel.toUpperCase()} · C ${r.settings.c} · ε ${r.settings.epsilon}${r.settings.gamma==null?'':' · γ '+r.settings.gamma}`
+      ])):'<p class="muted">No example runs in this session.</p>'}</section>`;
+  }
+
+  const views={monitor,calibration,validation};
+  root.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>{
+    state.view=button.dataset.view;
+    root.querySelectorAll('[data-view]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+    views[state.view]();
+  });
+  monitor();
+  new ResizeObserver(()=>{
+    if(state.view==='monitor') monitorPlots();
+    if(state.view==='calibration'&&byId('glucose-plot')) glucosePlot();
+  }).observe(root);
+})();
+</script>
+
+</body>
+</html>
