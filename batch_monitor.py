@@ -4,6 +4,8 @@ import altair as alt
 import pandas as pd
 import streamlit as st
 
+from data_provenance import show_replay_source
+
 from model_2 import FEATURES, HOUR, SEED
 from replay_data import SELECTIONS, SCENARIOS, SIMULATED_SPECTRA, SPECTRAL, SYNTHETIC
 from results_store import RECOVERY, RELEASE, load_calibration, load_replay, load_ridge
@@ -124,6 +126,7 @@ def show_operator(database, load_snapshot, metrics, playing, tick):
         show_forecast(forecasts, now, discharge, mode, replay["target"])
     show_readings(readings, forecasts, now, end, mode, lab)
     show_accuracy(database, load_snapshot, replay, metrics, now, lab)
+    show_replay_source(mode)
 
 
 def show_forecast(forecasts, now, discharge, mode, target):

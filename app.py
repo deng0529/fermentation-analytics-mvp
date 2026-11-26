@@ -4,6 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from batch_monitor import show_batch as show_batch_monitor
+from data_provenance import show_data_sources, show_model_1_source
 from example_data import SOURCES
 from explorer_plots import channel_scatter, spectral_overlay
 from results_store import RECOVERY, load_calibration
@@ -105,6 +106,7 @@ def show_preprocessing():
         left, right = st.columns(2)
         left.selectbox("Dataset", [NIR], key="prep_source")
         compound = right.selectbox("Target", TARGETS, key="prep_nir_target")
+        show_model_1_source()
 
     try:
         show_nir_preprocessing(compound)
@@ -122,6 +124,7 @@ def show_calibration():
     options = {f"{NIR} — {target}": target for target in TARGETS}
     selection = st.selectbox("Experiment", list(options), index=None, placeholder="Select the data source",
                              key="model_1a_experiment")
+    show_model_1_source(training=True)
     if selection is None:
         return
     target = options[selection]
@@ -326,6 +329,7 @@ def show_data_explorer():
             "| --- | --- | --- |\n"
             + "\n".join(f"| {name} | {purpose} | {kind} |" for name, purpose, kind in datasets)
         )
+        show_data_sources()
 
     with st.container(border=True, key="panel-inspection"):
         st.subheader("Inspect a spectral dataset")
